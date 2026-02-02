@@ -1,0 +1,19 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11", "ninja"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "photon"
+version = "0.0.1"
+description = "Deep Learning Framework"
+dependencies = ["numpy"]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.scikit-build]
+wheel.packages = ["python/photon"]
+cmake.verbose = true
