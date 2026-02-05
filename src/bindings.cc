@@ -6,9 +6,9 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(backend_cpu, m)
 {
-    py::class_<CompactArray>(m, "CompactArray")
+    py::class_<CompactArray<float>, std::shared_ptr<CompactArray<float>>>(m, "CompactArray")
         .def(py::init<const std::vector<float> &>())
-        .def_readonly("data", &CompactArray::data)
-        .def("size", &CompactArray::size)
-        .def("print", &CompactArray::print);
+        .def_readonly("data", &CompactArray<float>::data)
+        .def("size", &CompactArray<float>::size)
+        .def("print", &CompactArray<float>::print);
 }

@@ -2,10 +2,21 @@
 #include <vector>
 #include <cstddef>
 
-struct CompactArray
+template <typename T>
+class CompactArray
 {
-    std::vector<float> data;
-    CompactArray(const std::vector<float> &input);
-    size_t size();
-    void print();
+public:
+    std::vector<T> data;
+
+    CompactArray() = default;
+    explicit CompactArray(size_t size);
+    explicit CompactArray(const std::vector<T> &input);
+    explicit CompactArray(std::vector<T> &&input);
+
+    size_t size() const;
+    void print() const;
+
+    // pointers to data for gpu api.
+    T *ptr();
+    const T *ptr() const;
 };
