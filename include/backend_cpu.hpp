@@ -1,10 +1,14 @@
 #pragma once
 #include <vector>
 #include <cstddef>
+#include <memory>
+#include <iostream>
+
+using DimVec = std::vector<size_t>;
 
 /**
  * @brief A compact array class that manages contiguous block of memory for a single data type. This is the underlying storage for NDArray.
- * Just a std::vector wrapper for now, but can be extended to support GPU memoryn in the future.
+ * Just a std::vector wrapper for now, but can be extended to support GPU memory in the future.
  *
  * @tparam T The numeric data type of the array elements.
  */
@@ -38,24 +42,35 @@ public:
 template <typename T>
 class NDArray
 {
-    // Manage the data via shared_ptr
+    // shared pointer to actual data
     std::shared_ptr<CompactArray<T>> handle;
-    std::vector<size_t> shape;
-    std::vector<size_t> strides;
+    // the shape of the array view, attribute of the view
+    DimVec shape;
+    // the strides, attribute of the view, may not reflect memory layout
+    DimVec strides;
+    // the offset in the compact array, attribute of the view
     size_t offset;
+
+    // Internal funcs for contiguity checks
+    // Check if strides are row major order for the shape
+    bool has_row_major_strides() const;
+    // Check if underlying memory elements matches shape elements
+    bool has_size_matching_shape() const;
 
 public:
     // Zeroed NDArray of shape
-    explicit NDArray(const std::vector<size_t> &shape);
+    explicit NDArray(const DimVec &shape);
     // Create ndarray from existing vector + shape
-    NDArray(std::vector<T> data, const std::vector<size_t> shape);
+    NDArray(std::vector<T> data, DimVec shape);
     // Construct new view of existing ndarray with new shape and strides, internal use
-    NDArray(std::shared_ptr<CompactArray<T>> handle, std::vector<size_t> shape, std::vector<size_t> strides, size_t offset = 0);
+    NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, DimVec strides, size_t offset = 0);
 
-    void compute_strides();
+    // Helper function for initialising row major strides, called by constructors
+    void initialise_strides();
 
-    size_t size() const;
-    std::vector<size_t> shape() const;
-    std::vector<size_t> strides() const;
+    DimVec get_shape() const;
+    DimVec get_strides() const;
+    bool is_contiguous() const;
+
     void print() const;
 };
