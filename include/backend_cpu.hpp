@@ -58,15 +58,32 @@ class NDArray
     bool has_size_matching_shape() const;
 
 public:
+    struct Slice
+    {
+        int64_t start = 0;
+        int64_t stop = 0;
+        int64_t step = 1;
+    };
+
     // Zeroed NDArray of shape
     explicit NDArray(const DimVec &shape);
     // Create ndarray from existing vector + shape
     NDArray(std::vector<T> data, DimVec shape);
+    // 1D array
+    NDArray(std::vector<T> data);
     // Construct new view of existing ndarray with new shape and strides, internal use
     NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, DimVec strides, size_t offset = 0);
+    NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, size_t offset = 0);
 
     // Helper function for initialising row major strides, called by constructors
     void initialise_strides();
+
+    // View related funcs
+    NDArray<T> make_compact() const;
+    NDArray<T> reshape(const DimVec &new_shape) const;
+    NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
+    NDArray<T> transpose(const DimVec &axes) const;
+    NDArray<T> broadcast_to(const DimVec &new_shape) const;
 
     DimVec get_shape() const;
     DimVec get_strides() const;

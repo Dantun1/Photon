@@ -14,5 +14,10 @@ int main()
     {
         std::cout << "Tensor is contiguous." << std::endl;
     }
+
+    Tensor mini_tens{std::vector<float>{1, 2, 3, 4, 5, 6}};
+    mini_tens.print();
+    mini_tens.reshape({3, 2}).print();
+
     return 0;
 }
