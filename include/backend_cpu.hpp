@@ -57,6 +57,9 @@ class NDArray
     // Check if underlying memory elements matches shape elements
     bool has_size_matching_shape() const;
 
+    // struct Slice;
+    // DimVec get_sliced_shape(const std::vector<Slice> &slice_ranges) const;
+
 public:
     struct Slice
     {

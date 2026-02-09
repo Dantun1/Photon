@@ -16,8 +16,17 @@ int main()
     }
 
     Tensor mini_tens{std::vector<float>{1, 2, 3, 4, 5, 6}};
-    mini_tens.print();
-    mini_tens.reshape({3, 2}).print();
+    // mini_tens.print();
+    auto reshaped = mini_tens.reshape({3, 2});
+    // reshaped.print();
+
+    auto transposed = reshaped.transpose({1, 0});
+    // std::cout << transposed.is_contiguous();
+
+    auto slicex = Tensor::Slice{1, 3, 1};
+    auto slicey = Tensor::Slice{0, 1, 1};
+    auto sliced = reshaped.slice({slicex, slicey});
+    sliced.print();
 
     return 0;
 }

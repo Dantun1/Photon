@@ -167,17 +167,58 @@ NDArray<T> NDArray<T>::reshape(const DimVec &new_shape) const
     return NDArray<T>(source.handle, new_shape, new_strides, source.offset);
 }
 
-// template <typename T>
-// NDArray<T> NDArray<T>::slice(const std::vector<Slice> &slice_ranges) const
-// {
-//     return ...;
-// }
+template <typename T>
+NDArray<T> NDArray<T>::slice(const std::vector<Slice> &slice_ranges) const
+{
+    // TODO: Negative slice values, add testing for this.
+    if (slice_ranges.size() != shape.size())
+    {
+        throw std::invalid_argument("Number of slice ranges must match number of dimensions");
+    }
+    size_t new_offset = offset;
+    DimVec new_strides(strides.size());
+    DimVec sliced_shape(shape.size());
+    for (size_t i = 0; i < shape.size(); i++)
+    {
+        const auto &[start, stop, step] = slice_ranges[i];
+        if (step <= 0)
+        {
+            throw std::invalid_argument("Step size must be positive");
+        }
+        const int64_t dim = static_cast<int64_t>(shape[i]);
+        if (start < 0 || stop < 0 || start > stop || stop > dim)
+        {
+            throw std::invalid_argument("Slice range out of bounds");
+        }
 
-// template <typename T>
-// NDArray<T> NDArray<T>::transpose(const DimVec &axes) const
-// {
-//     return ...;
-// }
+        sliced_shape[i] = (stop - start + step - 1) / step;
+        new_offset += start * strides[i];
+        new_strides[i] = strides[i] * step;
+    }
+    return NDArray<T>(handle, sliced_shape, new_strides, new_offset);
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::transpose(const DimVec &axes) const
+{
+    if (axes.size() != shape.size())
+    {
+        throw std::invalid_argument("Invalid number of axes for transpose: must match number of dimensions");
+    }
+    DimVec new_shape(shape.size());
+    DimVec new_strides(strides.size());
+    for (size_t i = 0; i < axes.size(); i++)
+    {
+        if (axes[i] >= shape.size() or axes[i] < 0)
+        {
+            throw std::invalid_argument("Invalid axis index for transpose: must be less than number of dimensions");
+        }
+        // Permute the shape, swap the strides according to the new order.
+        new_shape[i] = shape[axes[i]];
+        new_strides[i] = strides[axes[i]];
+    }
+    return NDArray<T>(handle, new_shape, new_strides, offset);
+}
 
 // template <typename T>
 // NDArray<T> NDArray<T>::broadcast_to(const DimVec &new_shape) const
@@ -212,6 +253,12 @@ bool NDArray<T>::has_size_matching_shape() const
     size_t expected_size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
     return (handle->size() == expected_size);
 }
+
+// template <typename T>
+// DimVec NDArray<T>::get_sliced_shape(const std::vector<Slice> &slice) const
+// {
+
+// }
 
 template <typename T>
 void NDArray<T>::initialise_strides()
