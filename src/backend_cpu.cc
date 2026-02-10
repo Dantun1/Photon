@@ -254,12 +254,6 @@ bool NDArray<T>::has_size_matching_shape() const
     return (handle->size() == expected_size);
 }
 
-// template <typename T>
-// DimVec NDArray<T>::get_sliced_shape(const std::vector<Slice> &slice) const
-// {
-
-// }
-
 template <typename T>
 void NDArray<T>::initialise_strides()
 {
@@ -288,6 +282,18 @@ DimVec NDArray<T>::get_strides() const
 }
 
 template <typename T>
+size_t NDArray<T>::get_offset() const
+{
+    return offset;
+}
+
+template <typename T>
+std::shared_ptr<CompactArray<T>> NDArray<T>::get_handle() const
+{
+    return handle;
+}
+
+template <typename T>
 void NDArray<T>::print() const
 {
     std::cout << "Shape: [";
@@ -301,6 +307,14 @@ void NDArray<T>::print() const
         std::cout << stride << " ";
     }
     std::cout << "], Offset: " << offset << std::endl;
+
+    std::cout << "Data: ";
+    const T *data_ptr = handle->ptr();
+    // Print 10 elems to track handle
+    for (size_t i = 0; i < 20; i++)
+    {
+        std::cout << data_ptr[i] << " ";
+    }
 }
 
 template <typename T>

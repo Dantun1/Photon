@@ -90,6 +90,9 @@ public:
 
     DimVec get_shape() const;
     DimVec get_strides() const;
+    size_t get_offset() const;
+    std::shared_ptr<CompactArray<T>> get_handle() const;
+
     bool is_contiguous() const;
 
     void print() const;
