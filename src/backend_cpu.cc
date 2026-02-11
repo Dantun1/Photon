@@ -170,32 +170,36 @@ NDArray<T> NDArray<T>::reshape(const DimVec &new_shape) const
 template <typename T>
 NDArray<T> NDArray<T>::slice(const std::vector<Slice> &slice_ranges) const
 {
-    // TODO: Negative slice values, add testing for this.
-    if (slice_ranges.size() != shape.size())
-    {
-        throw std::invalid_argument("Number of slice ranges must match number of dimensions");
-    }
     size_t new_offset = offset;
-    DimVec new_strides(strides.size());
-    DimVec sliced_shape(shape.size());
-    for (size_t i = 0; i < shape.size(); i++)
-    {
-        const auto &[start, stop, step] = slice_ranges[i];
-        if (step <= 0)
-        {
-            throw std::invalid_argument("Step size must be positive");
-        }
-        const int64_t dim = static_cast<int64_t>(shape[i]);
-        if (start < 0 || stop < 0 || start > stop || stop > dim)
-        {
-            throw std::invalid_argument("Slice range out of bounds");
-        }
+    DimVec new_strides;
+    DimVec new_shape;
 
-        sliced_shape[i] = (stop - start + step - 1) / step;
+    for (size_t i = 0; i < slice_ranges.size(); i++)
+    {
+        const auto &[start, stop, step, is_index] = slice_ranges[i];
+
+        // shift offset (based on original strides)
         new_offset += start * strides[i];
-        new_strides[i] = strides[i] * step;
+
+        // if just scalar value for dim, we don't include in the
+        // shape/strides, just shift offset
+        if (is_index)
+        {
+            continue;
+        }
+        int64_t num_elements = (std::abs(stop - start) + std::abs(step) - 1) / std::abs(step);
+        new_shape.push_back(static_cast<size_t>(num_elements)); // round up division for shape dim
+        new_strides.push_back(strides[i] * step);
     }
-    return NDArray<T>(handle, sliced_shape, new_strides, new_offset);
+
+    for (size_t i = slice_ranges.size(); i < shape.size(); i++)
+    {
+        // dims not in slice_ranges are unchanged, just add to new shape and strides.
+        new_shape.push_back(shape[i]);
+        new_strides.push_back(strides[i]);
+    }
+
+    return NDArray<T>(handle, new_shape, new_strides, new_offset);
 }
 
 template <typename T>
@@ -211,13 +215,83 @@ NDArray<T> NDArray<T>::transpose(const DimVec &axes) const
     {
         if (axes[i] >= shape.size() or axes[i] < 0)
         {
-            throw std::invalid_argument("Invalid axis index for transpose: must be less than number of dimensions");
+            throw std::invalid_argument("Invalid axis index for transpose: must be between 0 and number of dimensions");
         }
         // Permute the shape, swap the strides according to the new order.
         new_shape[i] = shape[axes[i]];
         new_strides[i] = strides[axes[i]];
     }
     return NDArray<T>(handle, new_shape, new_strides, offset);
+}
+
+template <typename T>
+void NDArray<T>::setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar)
+{
+    NDArray<T> target_view = this->slice(slice_ranges);
+    DimVec target_shape = target_view.get_shape();
+    size_t total_size = std::accumulate(target_shape.begin(), target_shape.end(), 1ULL, std::multiplies<size_t>());
+    // Odometer logic based on shape/strides of the target view
+    T *write_ptr = handle->ptr();
+    DimVec indices(target_shape.size(), 0);
+    size_t curr_idx = target_view.get_offset();
+    for (size_t i = 0; i < total_size; i++)
+    {
+        write_ptr[curr_idx] = scalar;
+        for (int dim = static_cast<int>(target_shape.size()) - 1; dim >= 0; --dim)
+        {
+            // increment by target view strides
+            curr_idx += target_view.get_strides()[dim];
+            indices[dim]++;
+            if (indices[dim] == target_shape[dim])
+            {
+                indices[dim] = 0;
+                curr_idx -= target_shape[dim] * target_view.get_strides()[dim];
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+}
+template <typename T>
+void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source)
+{
+    NDArray<T> target_view = this->slice(slice_ranges);
+    DimVec target_shape = target_view.get_shape();
+    size_t total_size = std::accumulate(target_shape.begin(), target_shape.end(), 1ULL, std::multiplies<size_t>());
+
+    if (source.get_shape() != target_shape)
+    {
+        throw std::invalid_argument("Source shape must match target view");
+    }
+    // Odometer logic but two indices as 2 views being traversed.
+    size_t write_idx = target_view.get_offset();
+    size_t source_idx = source.get_offset();
+    T *write_ptr = handle->ptr();
+    const T *source_ptr = source.get_handle()->ptr();
+    DimVec indices(target_shape.size(), 0);
+
+    for (size_t i = 0; i < total_size; i++)
+    {
+        write_ptr[write_idx] = source_ptr[source_idx];
+        for (int dim = static_cast<int>(target_shape.size()) - 1; dim >= 0; --dim)
+        {
+            write_idx += target_view.get_strides()[dim];
+            source_idx += source.get_strides()[dim];
+            indices[dim]++;
+            if (indices[dim] == target_shape[dim])
+            {
+                indices[dim] = 0;
+                write_idx -= target_shape[dim] * target_view.get_strides()[dim];
+                source_idx -= target_shape[dim] * source.get_strides()[dim];
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
 }
 
 // template <typename T>

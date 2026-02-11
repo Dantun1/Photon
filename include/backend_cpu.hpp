@@ -57,15 +57,13 @@ class NDArray
     // Check if underlying memory elements matches shape elements
     bool has_size_matching_shape() const;
 
-    // struct Slice;
-    // DimVec get_sliced_shape(const std::vector<Slice> &slice_ranges) const;
-
 public:
     struct Slice
     {
-        int64_t start = 0;
-        int64_t stop = 0;
-        int64_t step = 1;
+        int64_t start;
+        int64_t stop;
+        int64_t step;
+        bool is_index = false;
     };
 
     // Zeroed NDArray of shape
@@ -87,6 +85,8 @@ public:
     NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
     NDArray<T> transpose(const DimVec &axes) const;
     NDArray<T> broadcast_to(const DimVec &new_shape) const;
+    void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
+    void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
 
     DimVec get_shape() const;
     DimVec get_strides() const;
