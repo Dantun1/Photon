@@ -101,6 +101,8 @@ NDArray<T>::NDArray(std::shared_ptr<CompactArray<T>> other, DimVec shape, size_t
 
 /**
  * View related member functions.
+ *
+ *
  */
 
 template <typename T>
@@ -261,15 +263,14 @@ void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDA
     DimVec target_shape = target_view.get_shape();
     size_t total_size = std::accumulate(target_shape.begin(), target_shape.end(), 1ULL, std::multiplies<size_t>());
 
-    if (source.get_shape() != target_shape)
-    {
-        throw std::invalid_argument("Source shape must match target view");
-    }
+    // Try broadcasting if doesn't match, will throw error if incompatible.
+    NDArray<T> broadcasted_source = (source.get_shape() == target_shape) ? source : source.broadcast(target_shape);
+
     // Odometer logic but two indices as 2 views being traversed.
     size_t write_idx = target_view.get_offset();
-    size_t source_idx = source.get_offset();
+    size_t source_idx = broadcasted_source.get_offset();
     T *write_ptr = handle->ptr();
-    const T *source_ptr = source.get_handle()->ptr();
+    const T *source_ptr = broadcasted_source.get_handle()->ptr();
     DimVec indices(target_shape.size(), 0);
 
     for (size_t i = 0; i < total_size; i++)
@@ -278,13 +279,13 @@ void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDA
         for (int dim = static_cast<int>(target_shape.size()) - 1; dim >= 0; --dim)
         {
             write_idx += target_view.get_strides()[dim];
-            source_idx += source.get_strides()[dim];
+            source_idx += broadcasted_source.get_strides()[dim];
             indices[dim]++;
             if (indices[dim] == target_shape[dim])
             {
                 indices[dim] = 0;
                 write_idx -= target_shape[dim] * target_view.get_strides()[dim];
-                source_idx -= target_shape[dim] * source.get_strides()[dim];
+                source_idx -= target_shape[dim] * broadcasted_source.get_strides()[dim];
             }
             else
             {
@@ -294,14 +295,133 @@ void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDA
     }
 }
 
-// template <typename T>
-// NDArray<T> NDArray<T>::broadcast_to(const DimVec &new_shape) const
-// {
-//     return ...;
-// }
+template <typename T>
+NDArray<T> NDArray<T>::broadcast(const DimVec &new_shape) const
+{
+    if (new_shape.size() < shape.size())
+    {
+        throw std::invalid_argument("Cannot broadcast to fewer dimensions");
+    }
+    DimVec new_strides(new_shape.size(), 0);
 
-/*
- * Getters and utility methods
+    for (int i = static_cast<int>(new_shape.size()) - 1, j = static_cast<int>(shape.size()) - 1; i >= 0; i--, j--)
+    {
+        if (j >= 0)
+        {
+            if (shape[j] == new_shape[i])
+            {
+                new_strides[i] = strides[j];
+            }
+            else if (shape[j] == 1)
+            {
+                new_strides[i] = 0;
+            }
+            else
+            {
+                throw std::invalid_argument("Cannot broadcast: incompatible shapes");
+            }
+        }
+    }
+
+    return NDArray<T>(handle, new_shape, new_strides, offset);
+}
+
+/**
+ * Arithmetic operations.
+ *
+ * Return new NDArrays with new, compact handles.
+ */
+
+template <typename T, typename Op>
+NDArray<T> ewise_op_kernel(const NDArray<T> &a, const NDArray<T> &b, Op op)
+{
+}
+
+template <typename T, typename Op>
+NDArray<T> scalar_op_kernel(const NDArray<T> &a, T scalar, Op op)
+{
+}
+
+template <typename T, typename Op>
+NDArray<T> unary_op_kernel(const NDArray<T> &a, Op op)
+{
+    NDArray<T> target{a.get_shape()};
+    const auto &shape = target.get_shape();
+    const auto &strides = a.get_strides();
+    size_t total_size = std::accumulate(shape.begin(), shape.end(), 1ULL, std::multiplies<size_t>());
+
+    T *new_data = target.get_handle()->ptr();
+    const T *old_data = a.get_handle()->ptr();
+
+    size_t curr_idx = a.get_offset();
+    DimVec indices(shape.size(), 0);
+    for (size_t i = 0; i < total_size; i++)
+    {
+        new_data[i] = op(old_data[curr_idx]);
+
+        for (int dim = static_cast<int>(shape.size()) - 1; dim >= 0; --dim)
+        {
+            indices[dim]++;
+            curr_idx += strides[dim];
+
+            if (indices[dim] < shape[dim])
+            {
+                break;
+            }
+            else
+            {
+                indices[dim] = 0;
+                curr_idx -= shape[dim] * strides[dim];
+            }
+        }
+    }
+    return target;
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::neg() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return -scalar; });
+}
+template <typename T>
+NDArray<T> NDArray<T>::exp() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::exp(scalar); });
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::log() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::log(scalar); });
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::sqrt() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::sqrt(scalar); });
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::sin() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::sin(scalar); });
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::cos() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::cos(scalar); });
+}
+
+/**
+ *  Getters and utility methods
+ *
  */
 
 template <typename T>

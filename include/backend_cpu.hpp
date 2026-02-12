@@ -84,9 +84,22 @@ public:
     NDArray<T> reshape(const DimVec &new_shape) const;
     NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
     NDArray<T> transpose(const DimVec &axes) const;
-    NDArray<T> broadcast_to(const DimVec &new_shape) const;
+    NDArray<T> broadcast(const DimVec &new_shape) const;
     void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
     void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
+
+    // Unary ops
+    NDArray<T> neg() const;
+    NDArray<T> exp() const;
+    NDArray<T> log() const;
+    NDArray<T> sqrt() const;
+    NDArray<T> sin() const;
+    NDArray<T> cos() const;
+
+    // Reductions
+    // NDArray<T> sum(DimVec axes, bool keepdims) const;
+    // NDArray<T> max(DimVec axes, bool keepdims) const;
+    // NDArray<T> min(DimVec axes, bool keepdims) const;
 
     DimVec get_shape() const;
     DimVec get_strides() const;

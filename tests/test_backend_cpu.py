@@ -186,3 +186,36 @@ def test_setitem_ewise_transposed_source():
     expected[0:3, 0:2] = np.array(s_data).reshape(2, 3).T
     
     npt.assert_allclose(np.array(target), expected)
+
+
+def test_setitem_ewise_broadcast_source():
+    target = be.NDArray([0] * 32, [2, 4, 4])
+    source = be.NDArray([1., 2., 3., 4.], [4])
+
+    # Given a 4x4 view on this target, broadcast + set from 1d source
+    target[:, 0, :] = source
+
+    expected = np.zeros((2, 4, 4))
+    expected[:, 0, :] = np.array([1., 2., 3., 4.])
+
+    npt.assert_allclose(np.array(target), expected)
+
+BROADCAST_CASES = [
+    ([2, 4, 4], [4]),
+    ([2, 3, 4], [4]),
+    ([2, 3, 4], [3, 4]),
+    ([2,3], [2,1])
+]
+
+@pytest.mark.parametrize("target_shape, source_shape", BROADCAST_CASES)
+def test_broadcasting_basic(target_shape, source_shape):
+
+    target = be.NDArray(np.arange(np.prod(target_shape), dtype=np.float32).tolist(), target_shape)
+    source_data = np.arange(np.prod(source_shape), dtype=np.float32).tolist()
+    source = be.NDArray(source_data, source_shape)
+
+    broadcasted = source.broadcast(target_shape)
+
+    expected = np.broadcast_to(np.array(source_data).reshape(source_shape), target_shape)
+
+    npt.assert_allclose(np.array(broadcasted), expected)
