@@ -95,7 +95,7 @@ public:
     NDArray<T> sqrt() const;
     NDArray<T> sin() const;
     NDArray<T> cos() const;
-
+    NDArray<T> tanh() const;
     // Reductions
     // NDArray<T> sum(DimVec axes, bool keepdims) const;
     // NDArray<T> max(DimVec axes, bool keepdims) const;

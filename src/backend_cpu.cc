@@ -335,11 +335,133 @@ NDArray<T> NDArray<T>::broadcast(const DimVec &new_shape) const
 template <typename T, typename Op>
 NDArray<T> ewise_op_kernel(const NDArray<T> &a, const NDArray<T> &b, Op op)
 {
+
+    const auto &shape = a.get_shape();
+
+    NDArray<T> broadcasted_b = (shape == b.get_shape()) ? b : b.broadcast(shape);
+    NDArray<T> target{shape};
+
+    const auto &astrides = a.get_strides();
+    const auto &bstrides = broadcasted_b.get_strides();
+    const auto &tstrides = target.get_strides();
+    size_t total_size = std::accumulate(shape.begin(), shape.end(), 1ULL, std::multiplies<size_t>());
+
+    T *new_data = target.get_handle()->ptr();
+    const T *aptr = a.get_handle()->ptr();
+    const T *bptr = broadcasted_b.get_handle()->ptr();
+
+    size_t t_idx = 0;
+    size_t a_idx = a.get_offset();
+    size_t b_idx = broadcasted_b.get_offset();
+
+    DimVec indices(shape.size(), 0);
+    for (size_t i = 0; i < total_size; i++)
+    {
+        new_data[t_idx] = op(aptr[a_idx], bptr[b_idx]);
+
+        for (int dim = static_cast<int>(shape.size()) - 1; dim >= 0; --dim)
+        {
+            indices[dim]++;
+            a_idx += astrides[dim];
+            b_idx += bstrides[dim];
+            t_idx += tstrides[dim];
+            if (indices[dim] < shape[dim])
+            {
+                break;
+            }
+            else
+            {
+                indices[dim] = 0;
+                a_idx -= shape[dim] * astrides[dim];
+                b_idx -= shape[dim] * bstrides[dim];
+                t_idx -= shape[dim] * tstrides[dim];
+            }
+        }
+    }
+    return target;
 }
 
 template <typename T, typename Op>
 NDArray<T> scalar_op_kernel(const NDArray<T> &a, T scalar, Op op)
 {
+    NDArray<T> target{a.get_shape()};
+    const auto &shape = target.get_shape();
+    const auto &strides = a.get_strides();
+    size_t total_size = std::accumulate(shape.begin(), shape.end(), 1ULL, std::multiplies<size_t>());
+
+    T *new_data = target.get_handle()->ptr();
+    const T *old_data = a.get_handle()->ptr();
+
+    size_t curr_idx = a.get_offset();
+    DimVec indices(shape.size(), 0);
+    for (size_t i = 0; i < total_size; i++)
+    {
+        new_data[i] = op(old_data[curr_idx], scalar);
+
+        for (int dim = static_cast<int>(shape.size()) - 1; dim >= 0; --dim)
+        {
+            indices[dim]++;
+            curr_idx += strides[dim];
+
+            if (indices[dim] < shape[dim])
+            {
+                break;
+            }
+            else
+            {
+                indices[dim] = 0;
+                curr_idx -= shape[dim] * strides[dim];
+            }
+        }
+    }
+    return target;
+}
+template <typename T>
+NDArray<T> scalar_add(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return a + b; });
+}
+
+template <typename T>
+NDArray<T> scalar_sub(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return a - b; });
+}
+template <typename T>
+NDArray<T> scalar_rsub(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return b - a; });
+}
+
+template <typename T>
+NDArray<T> scalar_div(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return a / b; });
+}
+
+template <typename T>
+NDArray<T> scalar_rdiv(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return b / a; });
+}
+
+template <typename T>
+NDArray<T> scalar_mul(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return a * b; });
+}
+
+template <typename T>
+NDArray<T> scalar_pow(const NDArray<T> &a, T b)
+{
+    return scalar_op_kernel(a, b, [](T a, T b)
+                            { return std::pow(a, b); });
 }
 
 template <typename T, typename Op>
@@ -417,6 +539,13 @@ NDArray<T> NDArray<T>::cos() const
 {
     return unary_op_kernel(*this, [](T scalar)
                            { return std::cos(scalar); });
+}
+
+template <typename T>
+NDArray<T> NDArray<T>::tanh() const
+{
+    return unary_op_kernel(*this, [](T scalar)
+                           { return std::tanh(scalar); });
 }
 
 /**
