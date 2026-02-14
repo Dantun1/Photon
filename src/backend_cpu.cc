@@ -5,6 +5,7 @@
 #include <functional>
 #include <stdexcept>
 #include <backend_cpu.hpp>
+#include <cmath>
 
 /*
  * Implementation of CompactArray methods.

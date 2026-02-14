@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 project(photon_backend LANGUAGES CXX)
 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
