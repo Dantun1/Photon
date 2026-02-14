@@ -296,17 +296,16 @@ void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDA
     }
 }
 
-template <typename T>
 DimVec broadcast_shape(const DimVec &s1, const DimVec &s2)
 {
     int dims = static_cast<int>(std::max(s1.size(), s2.size()));
     DimVec out(dims, 1);
 
-    // if dim
     for (size_t k = 0; k < dims; ++k)
     {
-        const size_t d1 = (k < s1.size()) ? s1[dims - 1 - k] : 1;
-        const size_t d2 = (k < s2.size()) ? s2[dims - 1 - k] : 1;
+     // enforce same dim, or either 1. If diff size, throw except.
+        const size_t d1 = (k < s1.size()) ? s1[s1.size() - 1 - k] : 1;
+        const size_t d2 = (k < s2.size()) ? s2[s2.size() - 1 - k] : 1;
 
         if (d1 == d2 || d1 == 1 || d2 == 1)
         {
@@ -703,6 +702,20 @@ bool NDArray<T>::is_contiguous() const
 {
     return has_row_major_strides();
 }
-
+// Instantiate float versions of templates 
 template class CompactArray<float>;
 template class NDArray<float>;
+template NDArray<float> ewise_add(const NDArray<float>&, const NDArray<float>&);
+template NDArray<float> ewise_sub(const NDArray<float>&, const NDArray<float>&);
+template NDArray<float> ewise_mul(const NDArray<float>&, const NDArray<float>&);
+template NDArray<float> ewise_div(const NDArray<float>&, const NDArray<float>&);
+template NDArray<float> ewise_pow(const NDArray<float>&, const NDArray<float>&);
+
+template NDArray<float> scalar_add(const NDArray<float>&, float);
+template NDArray<float> scalar_sub(const NDArray<float>&, float);
+template NDArray<float> scalar_mul(const NDArray<float>&, float);
+template NDArray<float> scalar_div(const NDArray<float>&, float);
+template NDArray<float> scalar_pow(const NDArray<float>&, float);
+
+template NDArray<float> scalar_rsub(const NDArray<float>&, float);
+template NDArray<float> scalar_rdiv(const NDArray<float>&, float);

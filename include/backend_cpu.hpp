@@ -110,3 +110,49 @@ public:
 
     void print() const;
 };
+
+// Scalar/Ewise op declarations
+template <typename T>
+NDArray<T> ewise_add(const NDArray<T> &a, const NDArray<T> &b);
+
+
+template <typename T>
+NDArray<T> scalar_add(const NDArray<T> &a, T b);
+
+template <typename T>
+NDArray<T> ewise_mul(const NDArray<T> &a, const NDArray<T> &b);
+
+template <typename T>
+NDArray<T> scalar_mul(const NDArray<T> &a, T b);
+
+template <typename T>
+NDArray<T> ewise_sub(const NDArray<T> &a, const NDArray<T> &b);
+
+template <typename T>
+NDArray<T> scalar_sub(const NDArray<T> &a, T b);
+
+template <typename T>
+NDArray<T> scalar_rsub(const NDArray<T> &a, T b);
+  
+template <typename T>
+NDArray<T> ewise_div(const NDArray<T> &a, const NDArray<T> &b);
+
+template <typename T>
+NDArray<T> scalar_div(const NDArray<T> &a, T b);
+
+template <typename T>
+NDArray<T> scalar_rdiv(const NDArray<T> &a, T b);
+
+template <typename T>
+NDArray<T> ewise_pow(const NDArray<T> &a, const NDArray<T> &b);
+
+template <typename T>
+NDArray<T> scalar_pow(const NDArray<T> &a, T b);
+
+
+
+
+
+
+
+
