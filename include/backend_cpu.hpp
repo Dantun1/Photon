@@ -97,9 +97,9 @@ public:
     NDArray<T> cos() const;
     NDArray<T> tanh() const;
     // Reductions
-    // NDArray<T> sum(DimVec axes, bool keepdims) const;
-    // NDArray<T> max(DimVec axes, bool keepdims) const;
-    // NDArray<T> min(DimVec axes, bool keepdims) const;
+    NDArray<T> sum(const DimVec& axes, bool keepdims = false) const;
+    NDArray<T> max(const DimVec& axes, bool keepdims = false) const;
+    NDArray<T> min(const DimVec& axes, bool keepdims = false) const;
 
     DimVec get_shape() const;
     DimVec get_strides() const;
