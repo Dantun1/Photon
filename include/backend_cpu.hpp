@@ -151,8 +151,32 @@ NDArray<T> scalar_pow(const NDArray<T> &a, T b);
 
 
 
+#include <compact_array.inl>
+#include <ndarray_core.inl>
+#include <ndarray_views.inl>
+#include <unary_ops.inl>
+#include <reduction_ops.inl>
+#include <ewise_ops.inl>
+#include <scalar_ops.inl>
 
+// extern template class instantiation, if file imports backend_cpu.hpp, it does not
+// implicitly create the template class 
+extern template class CompactArray<float>;
+extern template class NDArray<float>;
 
+extern template NDArray<float> ewise_add(const NDArray<float>&, const NDArray<float>&);
+extern template NDArray<float> ewise_sub(const NDArray<float>&, const NDArray<float>&);
+extern template NDArray<float> ewise_mul(const NDArray<float>&, const NDArray<float>&);
+extern template NDArray<float> ewise_div(const NDArray<float>&, const NDArray<float>&);
+extern template NDArray<float> ewise_pow(const NDArray<float>&, const NDArray<float>&);
 
+extern template NDArray<float> scalar_add(const NDArray<float>&, float);
+extern template NDArray<float> scalar_sub(const NDArray<float>&, float);
+extern template NDArray<float> scalar_mul(const NDArray<float>&, float);
+extern template NDArray<float> scalar_div(const NDArray<float>&, float);
+extern template NDArray<float> scalar_pow(const NDArray<float>&, float);
+
+extern template NDArray<float> scalar_rsub(const NDArray<float>&, float);
+extern template NDArray<float> scalar_rdiv(const NDArray<float>&, float);
 
 

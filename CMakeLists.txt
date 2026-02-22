@@ -10,8 +10,10 @@ execute_process(
 )
 find_package(pybind11 CONFIG REQUIRED)
 
-add_library(photon_core STATIC src/backend_cpu.cc)
+
+add_library(photon_core STATIC src/cpu/backend_float.cc)
 target_include_directories(photon_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(photon_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/cpu)
 
 if(NOT MSVC)
     target_compile_options(photon_core PRIVATE -O3)

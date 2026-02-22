@@ -105,6 +105,7 @@ PYBIND11_MODULE(backend_cpu, m)
         .def("sqrt", &NDArray<float>::sqrt)
         .def("sin", &NDArray<float>::sin)
         .def("cos", &NDArray<float>::cos)
+        .def("tanh", &NDArray<float>::tanh)
         //reduction ops
         .def("sum", &NDArray<float>::sum)
         .def("min", &NDArray<float>::min)
