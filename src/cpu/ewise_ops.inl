@@ -2,7 +2,6 @@
 #include <numeric>   
 #include <functional> 
 #include <cmath>    
-#include <backend_cpu.hpp>
 
 
 template <typename T>

@@ -5,7 +5,6 @@
 #include <numeric>
 #include <memory>
 #include <utility>
-#include <backend_cpu.hpp>
 
 
 /*

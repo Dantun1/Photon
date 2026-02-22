@@ -1,8 +1,6 @@
 #include <vector>
 #include <iostream>
 
-#include <backend_cpu.hpp>
-
 /*
  * Implementation of CompactArray methods.
  */

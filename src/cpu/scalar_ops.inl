@@ -2,7 +2,6 @@
 #include <numeric>   
 #include <functional> 
 #include <cmath>    
-#include <backend_cpu.hpp>
 
 template <typename T>
 void NDArray<T>::setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar)
