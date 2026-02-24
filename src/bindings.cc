@@ -113,6 +113,7 @@ PYBIND11_MODULE(backend_cpu, m)
         .def("reshape", &NDArray<float>::reshape)
         .def("broadcast", &NDArray<float>::broadcast)
         .def("make_compact", &NDArray<float>::make_compact)
+        .def("__matmul__", &matmul<float>, py::is_operator())
         .def("__getitem__", [](const NDArray<float> &self, py::object index)
              { 
                 auto slice_ranges = process_slices(self, index);

@@ -16,3 +16,5 @@ template NDArray<float> scalar_pow(const NDArray<float>&, float);
 
 template NDArray<float> scalar_rsub(const NDArray<float>&, float);
 template NDArray<float> scalar_rdiv(const NDArray<float>&, float);
+
+template NDArray<float> matmul(const NDArray<float>&, const NDArray<float>&);

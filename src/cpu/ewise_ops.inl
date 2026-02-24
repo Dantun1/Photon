@@ -2,6 +2,7 @@
 #include <numeric>   
 #include <functional> 
 #include <cmath>    
+#include <view_helpers.inl>
 
 
 template <typename T>

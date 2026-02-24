@@ -149,7 +149,8 @@ NDArray<T> ewise_pow(const NDArray<T> &a, const NDArray<T> &b);
 template <typename T>
 NDArray<T> scalar_pow(const NDArray<T> &a, T b);
 
-
+template <typename T>
+NDArray<T> matmul(const NDArray<T>& a, const NDArray<T>& b);
 
 #include <compact_array.inl>
 #include <ndarray_core.inl>
@@ -179,4 +180,4 @@ extern template NDArray<float> scalar_pow(const NDArray<float>&, float);
 extern template NDArray<float> scalar_rsub(const NDArray<float>&, float);
 extern template NDArray<float> scalar_rdiv(const NDArray<float>&, float);
 
-
+extern template NDArray<float> matmul(const NDArray<float>& a, const NDArray<float>& b);
