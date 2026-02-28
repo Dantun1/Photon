@@ -12,3 +12,8 @@ an optimized C++/CUDA backend.
 ## Status
 
 Building out the backends + sorting out bindings
+
+
+## Build
+
+- Note: need g++12 and nvcc 12.8 for compatibility with blackwell architecture on ubuntu 

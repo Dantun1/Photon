@@ -219,3 +219,25 @@ def test_broadcasting_basic(target_shape, source_shape):
     expected = np.broadcast_to(np.array(source_data).reshape(source_shape), target_shape)
 
     npt.assert_allclose(np.array(broadcasted), expected)
+
+
+MATMUL_CASES = [
+    ([2,2],[2,2]),
+    ([4,6,4,2,2],[4,6,4,2,2]),
+    ([4,6,1,2,2],[4,6,4,2,2]),
+    ([6,2],[2,8])
+]
+
+@pytest.mark.parametrize("mat_a_shape, mat_b_shape", MATMUL_CASES)
+def test_matmul(mat_a_shape, mat_b_shape):
+    a_data = np.arange(np.prod(mat_a_shape)).tolist()
+    b_data = np.arange(np.prod(mat_b_shape)).tolist()
+
+    a = be.NDArray(a_data, mat_a_shape)
+    b = be.NDArray(b_data, mat_b_shape)
+
+    result = a @ b
+
+    expected = np.array(a_data).reshape(mat_a_shape) @ np.array(b_data).reshape(mat_b_shape)
+
+    npt.assert_allclose(np.array(result),expected)

@@ -79,7 +79,7 @@ public:
     // Helper function for initialising row major strides, called by constructors
     void initialise_strides();
 
-    // View related funcs
+    // View related funcs 
     NDArray<T> make_compact() const;
     NDArray<T> reshape(const DimVec &new_shape) const;
     NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
@@ -179,5 +179,5 @@ extern template NDArray<float> scalar_pow(const NDArray<float>&, float);
 
 extern template NDArray<float> scalar_rsub(const NDArray<float>&, float);
 extern template NDArray<float> scalar_rdiv(const NDArray<float>&, float);
-
 extern template NDArray<float> matmul(const NDArray<float>& a, const NDArray<float>& b);
+

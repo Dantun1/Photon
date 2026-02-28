@@ -67,6 +67,7 @@ PYBIND11_MODULE(backend_cpu, m)
 
     py::class_<NDArray<float>>(m, "NDArray", py::buffer_protocol())
         .def(py::init<std::vector<float>, DimVec>())
+        .def(py::init<std::vector<float>>())
         .def_buffer([](NDArray<float> &m) -> py::buffer_info
                     {
         // Strides in B for numpy
