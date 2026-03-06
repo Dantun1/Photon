@@ -1,32 +1,24 @@
-#include <backend_cpu.hpp>
+#include <vector>
+#include <numeric> 
+#include <iostream>
+#include <backend_gpu.cuh>
 
-/**
- * Rough testing file, unit tests in python
- */
+int main() {
+    size_t N = 1000;
+    CompactArray<int> vec{N};
 
-using Tensor = NDArray<float>;
+    std::vector<int> h_buf(N);
+    
+    std::iota(h_buf.begin(), h_buf.end(), 0);
 
-int main()
-{
-    Tensor tensor{{1, 2, 3, 4}, {2, 2}};
-    tensor.print();
-    if (tensor.is_contiguous())
-    {
-        std::cout << "Tensor is contiguous." << std::endl;
-    }
+    vec.upload(h_buf.data(), N);
 
-    Tensor mini_tens{std::vector<float>{1, 2, 3, 4, 5, 6}};
-    // mini_tens.print();
-    auto reshaped = mini_tens.reshape({3, 2});
-    reshaped.print();
+    vec.add_device(10); 
 
-    auto transposed = reshaped.transpose({1, 0});
-    // std::cout << transposed.is_contiguous();
+    vec.download(h_buf.data(), N);
 
-    auto slicex = Tensor::Slice{0, 3, 1};
-    auto slicey = Tensor::Slice{0, 1, 1};
-    auto sliced = reshaped.slice({slicex, slicey});
-    sliced.print();
+    std::cout << "vec[0]: " << h_buf[0] << " (Expected 10)" << std::endl;
+    std::cout << "vec[1]: " << h_buf[1] << " (Expected 11)" << std::endl;
 
     return 0;
 }
