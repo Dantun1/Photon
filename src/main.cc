@@ -4,25 +4,17 @@
 #include <backend_gpu.cuh>
 
 int main() {
-    size_t N = 1000;
-    
+    std::cout << "Starting main" << std::endl;
     std::vector<float> data{1,2,3,4};
     DimVec shape{2,2};
     NDArray<float> tensor{data, shape};
+    
+    std::cout << "Created tensor. Handle pointer: " << tensor.handle().get() << std::endl;
 
-      std::cout << "Shape: [";
-      for (size_t dim : tensor.shape()) {
-          std::cout << dim << " ";
-      }
-      std::cout << "]" << std::endl;
-
-      std::cout << "Strides: [";
-      for (size_t stride : tensor.strides()) {
-          std::cout << stride << " ";
-      }
-      std::cout << "]" << std::endl;
-
-
+    auto new_tensor = tensor.make_compact();
+    
+    cudaDeviceSynchronize();
+    std::cout << "Sync complete" << std::endl;
 
     return 0;
 }

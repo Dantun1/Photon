@@ -26,7 +26,6 @@ public:
     size_t size() const;
     void print() const;
 
-    // pointers to data for gpu api.
     T *ptr();
     const T *ptr() const;
 };

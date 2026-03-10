@@ -26,7 +26,7 @@ NDArray<T>::NDArray(std::vector<T> data) : _shape{data.size()}, _offset{0}
 {
     _handle = std::make_shared<CompactArray<T>>(std::move(data));
     initialise_strides();
-}
+} 
 
 // ndarray given data + shape
 template <typename T>
@@ -38,7 +38,6 @@ NDArray<T>::NDArray(std::vector<T> data, DimVec shape) : _shape{std::move(shape)
     {
         throw std::invalid_argument("Data size does not match shape dimensions");
     }
-
     _handle = std::make_shared<CompactArray<T>>(std::move(data));
     initialise_strides();
 }

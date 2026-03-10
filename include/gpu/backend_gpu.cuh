@@ -28,6 +28,11 @@ public:
      T* d_ptr();
 };
 
+
+
+
+
+
 template <typename T>
 class NDArray  
 {
@@ -36,7 +41,9 @@ private:
     DimVec _shape;
     DimVec _strides;
     size_t _offset;
-  
+
+    // max dims supported 
+    static constexpr int MAX_DIMS = 10;
 
     // Internal funcs for contiguity checks
     // Check if strides are row major order for the shape
@@ -48,6 +55,13 @@ private:
     void initialise_strides();
 public:
 
+    //metadata struct to pass to gpu kernels
+    struct TensorMeta {
+      int rank;
+      size_t shape[MAX_DIMS];
+      size_t strides[MAX_DIMS];
+    };
+
     explicit NDArray(const DimVec &shape);
     // Create ndarray from existing vector + shape
     NDArray(std::vector<T> data, DimVec shape);
@@ -56,7 +70,9 @@ public:
     // Construct new view of existing ndarray with new shape and strides, internal use
     NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, DimVec strides, size_t offset = 0);
     NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, size_t offset = 0);
+    
 
+    NDArray<T> make_compact() const;
 
     const DimVec& shape() const;
     const DimVec& strides() const;
@@ -68,6 +84,7 @@ public:
 
 #include <compact_array_manual.inl>
 #include <ndarray_core_gpu.inl> 
+#include <ndarray_view_gpu.inl>
 
 
 extern template class CompactArray<float>;
