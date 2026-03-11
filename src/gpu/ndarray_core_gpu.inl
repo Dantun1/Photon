@@ -77,7 +77,7 @@ bool NDArray<T>::has_row_major_strides() const
 
 template <typename T>
 bool NDArray<T>::has_size_matching_shape() const
-{
+{ 
     size_t expected_size = std::accumulate(_shape.begin(), _shape.end(), 1, std::multiplies<size_t>());
     return (_handle->size() == expected_size);
 }
@@ -96,6 +96,12 @@ void NDArray<T>::initialise_strides()
         dim_stride *= _shape[i];
     }
 }
+
+template <typename T>
+bool NDArray<T>::is_contiguous() const {
+  return has_row_major_strides();
+}
+
 
 template <typename T>
 const DimVec& NDArray<T>::shape() const{

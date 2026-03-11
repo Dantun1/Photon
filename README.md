@@ -13,7 +13,9 @@ an optimized C++/CUDA backend.
 
 Building initial gpu backend, key kernels, profiling. 
 
-Need more robust linking as the gpu library was using cpu implementations as they were already compiled first. For now i just swapped the static linking order so I can focus on getting the GPU version working. 
+- Need more robust linking as the gpu library was using cpu implementations as they were already compiled first. For now i just swapped the static linking order so I can focus on getting the GPU version working. 
+
+- Need new common directory for the identical metadata based operations for cpu/gpu backend. 
 
 ## Build
 

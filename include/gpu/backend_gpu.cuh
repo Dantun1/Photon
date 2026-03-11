@@ -29,10 +29,6 @@ public:
 };
 
 
-
-
-
-
 template <typename T>
 class NDArray  
 {
@@ -45,6 +41,7 @@ private:
     // max dims supported 
     static constexpr int MAX_DIMS = 10;
 
+
     // Internal funcs for contiguity checks
     // Check if strides are row major order for the shape
     bool has_row_major_strides() const;
@@ -54,7 +51,14 @@ private:
     // Helper function for initialising row major strides, called by constructors
     void initialise_strides();
 public:
-
+    // slice struct for python slice manipulation
+    struct Slice
+    {
+        int64_t start;
+        int64_t stop;
+        int64_t step;
+        bool is_index = false;
+    };
     //metadata struct to pass to gpu kernels
     struct TensorMeta {
       int rank;
@@ -71,14 +75,24 @@ public:
     NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, DimVec strides, size_t offset = 0);
     NDArray(std::shared_ptr<CompactArray<T>> handle, DimVec shape, size_t offset = 0);
     
-
+    // View based ops
     NDArray<T> make_compact() const;
+    NDArray<T> reshape(const DimVec& new_shape) const;
+    NDArray<T> transpose(const DimVec& axes) const;
+    NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
+    NDArray<T> broadcast(const DimVec &new_shape) const;
+    // void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
+    // void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
 
+    
+    // Utilities
     const DimVec& shape() const;
     const DimVec& strides() const;
     size_t offset() const;
     std::shared_ptr<CompactArray<T>> handle();
-    std::shared_ptr<const CompactArray<T>> handle() const; 
+    std::shared_ptr<const CompactArray<T>> handle() const;     
+
+    bool is_contiguous() const;
 };
 
 
