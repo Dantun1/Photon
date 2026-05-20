@@ -1,8 +1,3 @@
-#include <vector>
-#include <numeric>   
-#include <functional> 
-#include <cmath>    
-
 template <typename T, typename Op>
 NDArray<T> unary_op_kernel(const NDArray<T> &a, Op op)
 {

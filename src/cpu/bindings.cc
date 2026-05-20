@@ -4,6 +4,8 @@
 
 namespace py = pybind11;
 
+using namespace photon::cpu;
+
 auto process_slices(const NDArray<float> &self, const py::object &index)
 {
     // populate slice_ranges then call slice func with it to return the new view.
@@ -107,7 +109,7 @@ PYBIND11_MODULE(backend_cpu, m)
         .def("sin", &NDArray<float>::sin)
         .def("cos", &NDArray<float>::cos)
         .def("tanh", &NDArray<float>::tanh)
-        //reduction ops
+        // reduction ops
         .def("sum", &NDArray<float>::sum)
         .def("min", &NDArray<float>::min)
         .def("max", &NDArray<float>::max)

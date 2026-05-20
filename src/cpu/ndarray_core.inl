@@ -1,12 +1,3 @@
-#include <vector>
-#include <iostream>
-#include <stdexcept>
-#include <functional>
-#include <numeric>
-#include <memory>
-#include <utility>
-
-
 /*
  * Implementation of NDArray methods.
  */

@@ -1,13 +1,5 @@
-#include <numeric>
-#include <memory>
-#include <vector>
-#include <utility>
-#include <functional>
-#include <stdexcept>
-#include <cmath>
-#include <algorithm>
-#include <view_helpers.inl>
 
+#include <view_helpers.inl>
 
 /**
  * View related member functions.
@@ -135,7 +127,6 @@ NDArray<T> NDArray<T>::transpose(const DimVec &axes) const
     }
     return NDArray<T>(handle, new_shape, new_strides, offset);
 }
-
 
 template <typename T>
 NDArray<T> NDArray<T>::broadcast(const DimVec &new_shape) const

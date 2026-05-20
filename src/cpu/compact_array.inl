@@ -1,6 +1,3 @@
-#include <vector>
-#include <iostream>
-
 /*
  * Implementation of CompactArray methods.
  */
@@ -41,4 +38,3 @@ const T *CompactArray<T>::ptr() const
 {
     return data.data();
 }
-

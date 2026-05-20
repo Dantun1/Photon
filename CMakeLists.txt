@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.8/bin/nvcc")
-project(photon_backend LANGUAGES CXX CUDA)
+project(photon_backend LANGUAGES CXX)
 
-set(CMAKE_CUDA_ARCHITECTURES 120)
-
-
+option(USE_CUDA "Build the GPU backend using CUDA" OFF)
 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 execute_process(
@@ -16,7 +13,6 @@ execute_process(
 )
 find_package(pybind11 CONFIG REQUIRED)
 
-# CPU backend
 add_library(photon_core_cpu STATIC src/cpu/backend_float.cc)
 target_include_directories(photon_core_cpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/cpu)
 target_include_directories(photon_core_cpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/cpu)
@@ -29,20 +25,16 @@ pybind11_add_module(backend_cpu MODULE src/cpu/bindings.cc)
 target_link_libraries(backend_cpu PRIVATE photon_core_cpu)
 install(TARGETS backend_cpu DESTINATION photon)
 
+if(USE_CUDA)
+    enable_language(CUDA)
+    set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.8/bin/nvcc")
+    set(CMAKE_CUDA_ARCHITECTURES 120)
 
-# GPU backend
-add_library(photon_core_gpu STATIC src/gpu/backend_float.cu)
-target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
-target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/gpu)
+    add_library(photon_core_gpu STATIC src/gpu/backend_float.cu)
+    target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
+    target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/gpu)
 
-
-pybind11_add_module(backend_gpu MODULE src/gpu/bindings.cu)
-target_link_libraries(backend_gpu PRIVATE photon_core_gpu)
-install(TARGETS backend_gpu DESTINATION photon)
-
-
-
-add_executable(cpp_test src/main.cc)
-set_source_files_properties(src/main.cc PROPERTIES LANGUAGE CUDA)
-target_include_directories(cpp_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
-target_link_libraries(cpp_test PRIVATE photon_core_gpu photon_core_cpu )
+    pybind11_add_module(backend_gpu MODULE src/gpu/bindings.cu)
+    target_link_libraries(backend_gpu PRIVATE photon_core_gpu)
+    install(TARGETS backend_gpu DESTINATION photon)
+endif()

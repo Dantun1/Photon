@@ -1,8 +1,3 @@
-#include <vector>
-#include <numeric>   
-#include <functional> 
-#include <cmath>    
-
 template <typename T>
 void NDArray<T>::setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar)
 {
@@ -120,4 +115,3 @@ NDArray<T> scalar_pow(const NDArray<T> &a, T b)
     return scalar_op_kernel(a, b, [](T a, T b)
                             { return std::pow(a, b); });
 }
-

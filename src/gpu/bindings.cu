@@ -5,6 +5,8 @@
 
 namespace py = pybind11;
 
+using namespace photon::gpu;
+
 auto process_slices(const NDArray<float> &self, const py::object &index)
 {
     // populate slice_ranges then call slice func with it to return the new view.
@@ -58,9 +60,10 @@ auto process_slices(const NDArray<float> &self, const py::object &index)
     return slice_ranges;
 }
 
-PYBIND11_MODULE(backend_gpu, m) {
+PYBIND11_MODULE(backend_gpu, m)
+{
     py::class_<NDArray<float>>(m, "NDArray")
-         // Constructors
+        // Constructors
         .def(py::init<std::vector<float>, DimVec>())
         .def(py::init<std::vector<float>>())
         // Metadata
@@ -76,7 +79,8 @@ PYBIND11_MODULE(backend_gpu, m) {
              { 
                 auto slice_ranges = process_slices(self, index);
                 return self.slice(slice_ranges); })
-        .def("numpy", [](const NDArray<float> &array) {
+        .def("numpy", [](const NDArray<float> &array)
+             {
 
             NDArray<float> compact_array = array.is_contiguous() ? array : array.make_compact();
 
@@ -95,6 +99,5 @@ PYBIND11_MODULE(backend_gpu, m) {
             size_t elements = compact_array.handle()->size();
             compact_array.handle()->download(h_ptr, elements);
 
-            return result;
-        });
+            return result; });
 }

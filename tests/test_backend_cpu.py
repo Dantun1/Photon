@@ -1,4 +1,3 @@
-
 import photon.backend_cpu as be
 import numpy as np
 import numpy.testing as npt
