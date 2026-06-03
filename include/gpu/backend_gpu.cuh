@@ -1,12 +1,28 @@
 #include <vector>
 #include <memory>
-
+#include <stdexcept>
+#include <iostream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <cmath>
+#include <algorithm>
 using DimVec = std::vector<size_t>;
 
 namespace photon
 {
     namespace gpu
-    {
+    {            
+        // max dims supported
+        static constexpr int MAX_DIMS = 10;
+        // metadata struct to pass to gpu kernels
+        struct TensorMeta
+            {
+                int rank;
+                size_t shape[MAX_DIMS];
+                size_t strides[MAX_DIMS];
+                size_t offset;
+            };
 
         template <typename T>
         class CompactArray
@@ -42,8 +58,6 @@ namespace photon
             DimVec _strides;
             size_t _offset;
 
-            // max dims supported
-            static constexpr int MAX_DIMS = 10;
 
             // Internal funcs for contiguity checks
             // Check if strides are row major order for the shape
@@ -63,13 +77,7 @@ namespace photon
                 int64_t step;
                 bool is_index = false;
             };
-            // metadata struct to pass to gpu kernels
-            struct TensorMeta
-            {
-                int rank;
-                size_t shape[MAX_DIMS];
-                size_t strides[MAX_DIMS];
-            };
+
 
             explicit NDArray(const DimVec &shape);
             // Create ndarray from existing vector + shape
@@ -86,7 +94,7 @@ namespace photon
             NDArray<T> transpose(const DimVec &axes) const;
             NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
             NDArray<T> broadcast(const DimVec &new_shape) const;
-            // void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
+            void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
             // void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
 
             // Utilities
@@ -102,6 +110,7 @@ namespace photon
 #include <compact_array_manual.inl>
 #include <ndarray_core_gpu.inl>
 #include <ndarray_view_gpu.inl>
+#include <scalar_ops_gpu.inl>
 
         extern template class CompactArray<float>;
         extern template class NDArray<float>;

@@ -79,6 +79,10 @@ PYBIND11_MODULE(backend_gpu, m)
              { 
                 auto slice_ranges = process_slices(self, index);
                 return self.slice(slice_ranges); })
+        .def("__setitem__", [](NDArray<float> &self, py::object index, float value) {
+            auto slice_ranges = process_slices(self, index);
+            self.setitem_scalar(slice_ranges, value);
+        })
         .def("numpy", [](const NDArray<float> &array)
              {
 

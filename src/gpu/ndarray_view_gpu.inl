@@ -1,24 +1,19 @@
-#include <numeric>
-#include <memory>
-#include <vector>
-#include <utility>
-#include <functional>
-#include <stdexcept>
-#include <cmath>
-#include <algorithm>
+
 
 template <typename T>
 __global__ 
-void compaction_kernel(const T* src, T* dst, size_t size, typename NDArray<T>::TensorMeta meta, size_t offset){
+void compaction_kernel(const T* src, T* dst, size_t size, TensorMeta meta){
   size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (tid >= size) return;
   
   size_t temp_idx = tid;
-  size_t read_idx = offset;
+  size_t read_idx = meta.offset;
   
   // compute index into read pointer using tid
   for (int dim = meta.rank - 1; dim >= 0; dim--){
+    // mapped 1d to the tensor position
+    // like mapping seconds time to minutes and hours e.g. 125 seconds.
     size_t dim_offset = temp_idx % meta.shape[dim];
     read_idx += dim_offset * meta.strides[dim];
     temp_idx /= meta.shape[dim];
@@ -28,6 +23,7 @@ void compaction_kernel(const T* src, T* dst, size_t size, typename NDArray<T>::T
 }
 
 
+
 template <typename T>
 NDArray<T> NDArray<T>::make_compact() const {
   const auto& shape = this->shape();
@@ -35,13 +31,18 @@ NDArray<T> NDArray<T>::make_compact() const {
   size_t offset = this->offset();
 
   const auto old_handle = this->handle();
-  size_t size = std::accumulate(shape.begin(),shape.end(), 1ULL, std::multiplies<T>());
+  size_t size = std::accumulate(shape.begin(),shape.end(), 1ULL, std::multiplies<size_t>());
   size_t rank = shape.size();
+
+  if (rank > MAX_DIMS) {
+    throw std::invalid_argument("Tensor rank exceeds maximum supported dimensions (MAX_DIMS).");
+  }
 
   auto new_handle = std::make_shared<CompactArray<T>>(size);
 
   TensorMeta meta;
   meta.rank = rank;
+  meta.offset = offset;
   for (size_t i = 0; i < rank; ++i) {
       meta.shape[i] = shape[i];
       meta.strides[i] = strides[i];
@@ -52,20 +53,11 @@ NDArray<T> NDArray<T>::make_compact() const {
   // launch many blocks to maximise SM utilisation
   compaction_kernel<<<blocks, threads>>>(
       old_handle->d_ptr(), new_handle->d_ptr(),
-      size, meta, offset);
+      size, meta);
 
   return NDArray<T>(new_handle, shape);
 }
-// Need kernels for these
-// massively parallel setting
 
-void setitem_scalar(const std::vector<Slice>& slice_ranges, T scalar) {
-  return;
-}
-
-void setitem_ewise(const std::vector<Slice>& slice_ranges,  const NDArray<T> &source) {
-  return;
-}
 /**
  * Metadata based view ops. No need to manipulate data
  *

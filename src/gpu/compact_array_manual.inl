@@ -1,5 +1,4 @@
-#include <vector>
-#include <stdexcept>
+
 // This version manually allocates/frees from global memory
 // rather than unified memory - i want to profile the performance bottlenecks.
 
