@@ -103,6 +103,7 @@ namespace photon
             size_t offset() const;
             std::shared_ptr<CompactArray<T>> handle();
             std::shared_ptr<const CompactArray<T>> handle() const;
+            TensorMeta meta() const; 
 
             bool is_contiguous() const;
         };

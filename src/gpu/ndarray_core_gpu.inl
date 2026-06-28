@@ -97,6 +97,7 @@ bool NDArray<T>::is_contiguous() const {
 }
 
 
+
 template <typename T>
 const DimVec& NDArray<T>::shape() const{
   return _shape;
@@ -121,5 +122,21 @@ std::shared_ptr<const CompactArray<T>> NDArray<T>::handle() const {
   return _handle;
 }
 
+template <typename T>
+TensorMeta NDArray<T>::meta() const{
+  // construct meta struct of basic types for kernel compatibility
+  // by-value kernel arg -> lands in parameter space, broadcast-cached across threads
+  TensorMeta tmeta{};
+  tmeta.rank = _shape.size();
+  if (tmeta.rank > MAX_DIMS) {
+    throw std::invalid_argument("rank exceeds MAX_DIMS");
+  }
+  tmeta.offset = offset();
+  for (int i = 0; i < tmeta.rank; i++) {
+    tmeta.shape[i] = _shape[i];
+    tmeta.strides[i] = _strides[i];
+  }
+  return tmeta;
+}
 
 

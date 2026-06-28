@@ -40,20 +40,14 @@ NDArray<T> NDArray<T>::make_compact() const {
 
   auto new_handle = std::make_shared<CompactArray<T>>(size);
 
-  TensorMeta meta;
-  meta.rank = rank;
-  meta.offset = offset;
-  for (size_t i = 0; i < rank; ++i) {
-      meta.shape[i] = shape[i];
-      meta.strides[i] = strides[i];
-  }
+  TensorMeta tmeta = meta();
   
   int threads = 256;
   int blocks = (size + threads - 1) / threads;
   // launch many blocks to maximise SM utilisation
   compaction_kernel<<<blocks, threads>>>(
       old_handle->d_ptr(), new_handle->d_ptr(),
-      size, meta);
+      size, tmeta);
 
   return NDArray<T>(new_handle, shape);
 }
@@ -67,8 +61,8 @@ template <typename T>
 NDArray<T> NDArray<T>::reshape(const DimVec& new_shape) const{
   
     // New shape must have same elements.
-    size_t new_size = std::accumulate(new_shape.begin(), new_shape.end(), 1, std::multiplies<size_t>());
-    size_t current_size = std::accumulate(_shape.begin(), _shape.end(), 1, std::multiplies<size_t>());
+    size_t new_size = std::accumulate(new_shape.begin(), new_shape.end(), 1ULL, std::multiplies<size_t>());
+    size_t current_size = std::accumulate(_shape.begin(), _shape.end(), 1ULL, std::multiplies<size_t>());
 
     if (new_size != current_size)
     {
