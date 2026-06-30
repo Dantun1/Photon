@@ -67,6 +67,9 @@ namespace photon
 
             // Helper function for initialising row major strides, called by constructors
             void initialise_strides();
+            
+            template <typename Op>
+            NDArray<T> unary_dispatch(Op op) const;
 
         public:
             // slice struct for python slice manipulation
@@ -95,7 +98,21 @@ namespace photon
             NDArray<T> slice(const std::vector<Slice> &slice_ranges) const;
             NDArray<T> broadcast(const DimVec &new_shape) const;
             void setitem_scalar(const std::vector<Slice> &slice_ranges, T scalar);
-            // void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
+            void setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source);
+            
+            // Unary ops
+            NDArray<T> neg() const;
+            NDArray<T> exp() const;
+            NDArray<T> log() const;
+            NDArray<T> sqrt() const;
+            NDArray<T> sin() const;
+            NDArray<T> cos() const;
+            NDArray<T> tanh() const;
+
+            // Reductions
+            // NDArray<T> sum(const DimVec &axes, bool keepdims = false) const;
+            // NDArray<T> max(const DimVec &axes, bool keepdims = false) const;
+            // NDArray<T> min(const DimVec &axes, bool keepdims = false) const;
 
             // Utilities
             const DimVec &shape() const;
@@ -107,6 +124,46 @@ namespace photon
 
             bool is_contiguous() const;
         };
+
+        // Scalar/Ewise op declarations
+        // template <typename T>
+        // NDArray<T> ewise_add(const NDArray<T> &a, const NDArray<T> &b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_add(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> ewise_mul(const NDArray<T> &a, const NDArray<T> &b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_mul(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> ewise_sub(const NDArray<T> &a, const NDArray<T> &b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_sub(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_rsub(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> ewise_div(const NDArray<T> &a, const NDArray<T> &b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_div(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_rdiv(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> ewise_pow(const NDArray<T> &a, const NDArray<T> &b);
+        //
+        // template <typename T>
+        // NDArray<T> scalar_pow(const NDArray<T> &a, T b);
+        //
+        // template <typename T>
+        // NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b);
 
 #include <compact_array_manual.inl>
 #include <ndarray_core_gpu.inl>

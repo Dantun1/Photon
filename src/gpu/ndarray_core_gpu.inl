@@ -9,7 +9,7 @@ template <typename T>
 NDArray<T>::NDArray(const DimVec &shape) : _shape{shape}, _offset{0}
 {
     // Make a new shared pointer to compact array with total size
-    size_t total_size = std::accumulate(_shape.begin(), _shape.end(), 1, std::multiplies<size_t>());
+    size_t total_size = std::accumulate(_shape.begin(), _shape.end(), 1ULL, std::multiplies<size_t>());
     // Handle to zeroed compact array of total size
     _handle = std::make_shared<CompactArray<T>>(total_size);
     initialise_strides();
@@ -26,7 +26,7 @@ NDArray<T>::NDArray(std::vector<T> data) : _shape{data.size()}, _offset{0}
 template <typename T>
 NDArray<T>::NDArray(std::vector<T> data, DimVec shape) : _shape{std::move(shape)}, _offset{0}
 {
-    size_t expected_size = std::accumulate(_shape.begin(), _shape.end(), 1, std::multiplies<size_t>());
+    size_t expected_size = std::accumulate(_shape.begin(), _shape.end(), 1ULL, std::multiplies<size_t>());
 
     if (data.size() != expected_size)
     {

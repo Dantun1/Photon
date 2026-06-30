@@ -9,7 +9,6 @@ void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDA
 
     // Try broadcasting if doesn't match, will throw error if incompatible.
     NDArray<T> broadcasted_source = (source.get_shape() == target_shape) ? source : source.broadcast(target_shape);
-
     // Odometer logic but two indices as 2 views being traversed.
     size_t write_idx = target_view.get_offset();
     size_t source_idx = broadcasted_source.get_offset();

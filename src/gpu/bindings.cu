@@ -70,7 +70,15 @@ PYBIND11_MODULE(backend_gpu, m)
         .def_property_readonly("shape", &NDArray<float>::shape)
         .def_property_readonly("strides", &NDArray<float>::strides)
         .def_property_readonly("offset", &NDArray<float>::offset)
-        // Compaction
+        // Arithmetic ops
+        .def("neg", &NDArray<float>::neg)
+        .def("exp", &NDArray<float>::exp)
+        .def("log", &NDArray<float>::log)
+        .def("sqrt", &NDArray<float>::sqrt)
+        .def("sin", &NDArray<float>::sin)
+        .def("cos", &NDArray<float>::cos)
+        .def("tanh", &NDArray<float>::tanh)
+        // View ops
         .def("make_compact", &NDArray<float>::make_compact)
         .def("reshape", &NDArray<float>::reshape)
         .def("transpose", &NDArray<float>::transpose)
@@ -79,10 +87,21 @@ PYBIND11_MODULE(backend_gpu, m)
              { 
                 auto slice_ranges = process_slices(self, index);
                 return self.slice(slice_ranges); })
-        .def("__setitem__", [](NDArray<float> &self, py::object index, float value) {
-            auto slice_ranges = process_slices(self, index);
-            self.setitem_scalar(slice_ranges, value);
-        })
+        .def("__setitem__", [](NDArray<float> &self, py::object index, py::object value)
+             {
+                 auto slice_ranges = process_slices(self, index);
+                 if (py::isinstance<py::float_>(value) || py::isinstance<py::int_>(value))
+                 {
+                     self.setitem_scalar(slice_ranges, value.cast<float>());
+                 }
+                 else if (py::isinstance<NDArray<float>>(value))
+                 {
+                     self.setitem_ewise(slice_ranges, value.cast<NDArray<float>>());
+                 }
+                 else
+                 {
+                     throw py::type_error("Value must be a scalar or NDArray");
+                 } })
         .def("numpy", [](const NDArray<float> &array)
              {
 

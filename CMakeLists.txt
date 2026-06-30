@@ -34,6 +34,8 @@ if(USE_CUDA)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/gpu)
 
+    target_compile_options(photon_core_gpu PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
+
     pybind11_add_module(backend_gpu MODULE src/gpu/bindings.cu)
     target_link_libraries(backend_gpu PRIVATE photon_core_gpu)
     install(TARGETS backend_gpu DESTINATION photon)

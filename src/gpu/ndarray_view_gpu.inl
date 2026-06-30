@@ -26,20 +26,21 @@ void compaction_kernel(const T* src, T* dst, size_t size, TensorMeta meta){
 
 template <typename T>
 NDArray<T> NDArray<T>::make_compact() const {
-  const auto& shape = this->shape();
-  const auto& strides = this->strides();
-  size_t offset = this->offset();
-
-  const auto old_handle = this->handle();
-  size_t size = std::accumulate(shape.begin(),shape.end(), 1ULL, std::multiplies<size_t>());
-  size_t rank = shape.size();
+  // reject rank > max dims supported
+  size_t rank = _shape.size();
 
   if (rank > MAX_DIMS) {
     throw std::invalid_argument("Tensor rank exceeds maximum supported dimensions (MAX_DIMS).");
   }
+  
+  // make new contig buffer 
+
+  size_t size = std::accumulate(_shape.begin(),_shape.end(), 1ULL, std::multiplies<size_t>());
 
   auto new_handle = std::make_shared<CompactArray<T>>(size);
 
+  // get old handle metadata to pass to kernel
+  const auto old_handle = handle();
   TensorMeta tmeta = meta();
   
   int threads = 256;
@@ -49,7 +50,7 @@ NDArray<T> NDArray<T>::make_compact() const {
       old_handle->d_ptr(), new_handle->d_ptr(),
       size, tmeta);
 
-  return NDArray<T>(new_handle, shape);
+  return NDArray<T>(new_handle, _shape);
 }
 
 /**
@@ -94,7 +95,7 @@ NDArray<T> NDArray<T>::transpose(const DimVec &axes) const
     DimVec new_strides(_strides.size());
     for (size_t i = 0; i < axes.size(); i++)
     {
-        if (axes[i] >= _shape.size() or axes[i] < 0)
+        if (axes[i] >= _shape.size())
         {
             throw std::invalid_argument("Invalid axis index for transpose: must be between 0 and number of dimensions");
         }
