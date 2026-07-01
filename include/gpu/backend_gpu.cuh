@@ -126,51 +126,72 @@ namespace photon
         };
 
         // Scalar/Ewise op declarations
-        // template <typename T>
-        // NDArray<T> ewise_add(const NDArray<T> &a, const NDArray<T> &b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_add(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> ewise_mul(const NDArray<T> &a, const NDArray<T> &b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_mul(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> ewise_sub(const NDArray<T> &a, const NDArray<T> &b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_sub(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_rsub(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> ewise_div(const NDArray<T> &a, const NDArray<T> &b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_div(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_rdiv(const NDArray<T> &a, T b);
-        //
-        // template <typename T>
-        // NDArray<T> ewise_pow(const NDArray<T> &a, const NDArray<T> &b);
-        //
-        // template <typename T>
-        // NDArray<T> scalar_pow(const NDArray<T> &a, T b);
-        //
+        template <typename T>
+        NDArray<T> ewise_add(const NDArray<T> &a, const NDArray<T> &b);
+
+        template <typename T>
+        NDArray<T> scalar_add(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> ewise_mul(const NDArray<T> &a, const NDArray<T> &b);
+
+        template <typename T>
+        NDArray<T> scalar_mul(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> ewise_sub(const NDArray<T> &a, const NDArray<T> &b);
+
+        template <typename T>
+        NDArray<T> scalar_sub(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> scalar_rsub(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> ewise_div(const NDArray<T> &a, const NDArray<T> &b);
+
+        template <typename T>
+        NDArray<T> scalar_div(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> scalar_rdiv(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> ewise_pow(const NDArray<T> &a, const NDArray<T> &b);
+
+        template <typename T>
+        NDArray<T> scalar_pow(const NDArray<T> &a, T b);
+
+        template <typename T>
+        NDArray<T> scalar_rpow(const NDArray<T> &a, T b);
         // template <typename T>
         // NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b);
 
 #include <compact_array_manual.inl>
 #include <ndarray_core_gpu.inl>
 #include <ndarray_view_gpu.inl>
+#include <unary_ops_gpu.inl>
 #include <scalar_ops_gpu.inl>
+#include <ewise_ops_gpu.inl>
+
 
         extern template class CompactArray<float>;
         extern template class NDArray<float>;
+        
+        extern template NDArray<float> ewise_add(const NDArray<float> &, const NDArray<float> &);
+        extern template NDArray<float> ewise_sub(const NDArray<float> &, const NDArray<float> &);
+        extern template NDArray<float> ewise_mul(const NDArray<float> &, const NDArray<float> &);
+        extern template NDArray<float> ewise_div(const NDArray<float> &, const NDArray<float> &);
+        extern template NDArray<float> ewise_pow(const NDArray<float> &, const NDArray<float> &);
+
+        extern template NDArray<float> scalar_add(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_sub(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_mul(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_div(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_pow(const NDArray<float> &, float);
+
+        extern template NDArray<float> scalar_rsub(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_rdiv(const NDArray<float> &, float);
+        extern template NDArray<float> scalar_rpow(const NDArray<float> &, float);
     }
 }

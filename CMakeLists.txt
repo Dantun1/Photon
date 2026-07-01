@@ -14,6 +14,7 @@ execute_process(
 find_package(pybind11 CONFIG REQUIRED)
 
 add_library(photon_core_cpu STATIC src/cpu/backend_float.cc)
+target_include_directories(photon_core_cpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(photon_core_cpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/cpu)
 target_include_directories(photon_core_cpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/cpu)
 
@@ -31,12 +32,14 @@ if(USE_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 120)
 
     add_library(photon_core_gpu STATIC src/gpu/backend_float.cu)
+    target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/gpu)
 
     target_compile_options(photon_core_gpu PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
 
     pybind11_add_module(backend_gpu MODULE src/gpu/bindings.cu)
+    target_compile_options(backend_gpu PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
     target_link_libraries(backend_gpu PRIVATE photon_core_gpu)
     install(TARGETS backend_gpu DESTINATION photon)
 endif()

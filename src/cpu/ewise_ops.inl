@@ -1,4 +1,4 @@
-#include <view_helpers.inl>
+#include "core/view_helpers.inl"
 
 template <typename T>
 void NDArray<T>::setitem_ewise(const std::vector<Slice> &slice_ranges, const NDArray<T> &source)

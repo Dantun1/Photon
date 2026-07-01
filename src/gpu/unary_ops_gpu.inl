@@ -70,34 +70,34 @@ template <typename T>
 NDArray<T> NDArray<T>::exp() const
 {
   // cuda builtins for math functors
-  return unary_dispatch([] __device__ (T scalar) { return exp(scalar); });
+  return unary_dispatch([] __device__ (T scalar) { return ::exp(scalar); });
 }
 template <typename T>
 NDArray<T> NDArray<T>::log() const
 {
-    return unary_dispatch([] __device__ (T scalar) { return log(scalar); });
+    return unary_dispatch([] __device__ (T scalar) { return ::log(scalar); });
 }
 
 template <typename T>
 NDArray<T> NDArray<T>::sqrt() const
 {
-    return unary_dispatch([] __device__ (T scalar) { return sqrt(scalar); });
+    return unary_dispatch([] __device__ (T scalar) { return ::sqrt(scalar); });
 }
 
 template <typename T>
 NDArray<T> NDArray<T>::sin() const
 {
-    return unary_dispatch([] __device__ (T scalar) { return sin(scalar); });
+    return unary_dispatch([] __device__ (T scalar) { return ::sin(scalar); });
 }
 
 template <typename T>
 NDArray<T> NDArray<T>::cos() const
 {
-    return unary_dispatch([] __device__ (T scalar) { return cos(scalar); });
+    return unary_dispatch([] __device__ (T scalar) { return ::cos(scalar); });
 }
 
 template <typename T>
 NDArray<T> NDArray<T>::tanh() const
 {
-    return unary_dispatch([] __device__ (T scalar) { return tanh(scalar); });
+    return unary_dispatch([] __device__ (T scalar) { return ::tanh(scalar); });
 }
