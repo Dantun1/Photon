@@ -1,3 +1,9 @@
+#pragma once 
+
+// to prevent shared library duplicating singleton, could be problem in future
+#define PHOTON_API __attribute__((visibility("default")))
+
+
 #include <vector>
 #include <memory>
 #include <stdexcept>
@@ -7,15 +13,17 @@
 #include <utility>
 #include <cmath>
 #include <algorithm>
+
 using DimVec = std::vector<size_t>;
 
 namespace photon
 {
     namespace gpu
     {            
-        // max dims supported
+        // -- Max dims supported in gpu backend -- 
         static constexpr int MAX_DIMS = 10;
-        // metadata struct to pass to gpu kernels
+
+        // -- Metadata struct to pass to gpu kernels --
         struct TensorMeta
             {
                 int rank;
@@ -24,6 +32,8 @@ namespace photon
                 size_t offset;
             };
 
+
+        // -- VRAM memory buffer -- 
         template <typename T>
         class CompactArray
         {
@@ -49,6 +59,25 @@ namespace photon
             T *d_ptr();
         };
 
+        // -- Singleton for device properties + dynamic kernel dispatch -- 
+        // (better than dependency injection alternative)
+        struct PHOTON_API DeviceManager {
+        public:
+          int num_sms;
+          int max_shared_memory_per_block;
+          int max_threads_per_block;
+
+          DeviceManager(const DeviceManager&) = delete;
+          DeviceManager(DeviceManager&&) = delete;
+          DeviceManager& operator=(const DeviceManager&) = delete;
+          DeviceManager& operator=(DeviceManager&&) = delete;
+
+          static const DeviceManager& get();
+        private:
+          DeviceManager();
+        };
+
+        // -- NDArray view over GPU memory -- 
         template <typename T>
         class NDArray
         {
@@ -71,6 +100,8 @@ namespace photon
             template <typename Op>
             NDArray<T> unary_dispatch(Op op) const;
 
+            template <typename Op>
+            NDArray<T> reduction_dispatch(Op op) const;
         public:
             // slice struct for python slice manipulation
             struct Slice
@@ -110,9 +141,9 @@ namespace photon
             NDArray<T> tanh() const;
 
             // Reductions
-            // NDArray<T> sum(const DimVec &axes, bool keepdims = false) const;
-            // NDArray<T> max(const DimVec &axes, bool keepdims = false) const;
-            // NDArray<T> min(const DimVec &axes, bool keepdims = false) const;
+            NDArray<T> sum(const DimVec &axes, bool keepdims = false) const;
+            NDArray<T> max(const DimVec &axes, bool keepdims = false) const;
+            NDArray<T> min(const DimVec &axes, bool keepdims = false) const;
 
             // Utilities
             const DimVec &shape() const;
@@ -167,12 +198,6 @@ namespace photon
         // template <typename T>
         // NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b);
 
-#include <compact_array_manual.inl>
-#include <ndarray_core_gpu.inl>
-#include <ndarray_view_gpu.inl>
-#include <unary_ops_gpu.inl>
-#include <scalar_ops_gpu.inl>
-#include <ewise_ops_gpu.inl>
 
 
         extern template class CompactArray<float>;

@@ -1,9 +1,18 @@
+#include <cuda/std/limits>
+
 #include <backend_gpu.cuh>
 
 namespace photon
 {
     namespace gpu
-    {
+    {   
+        #include <compact_array_manual.inl>
+        #include <ndarray_core_gpu.inl>
+        #include <ndarray_view_gpu.inl>
+        #include <unary_ops_gpu.inl>
+        #include <scalar_ops_gpu.inl>
+        #include <ewise_ops_gpu.inl>
+
         template class CompactArray<float>;
         template class NDArray<float>;
         
