@@ -16,4 +16,4 @@ dev = [
 
 [tool.scikit-build]
 wheel.packages = ["python/photon"]
-cmake.verbose = true
+build.verbose = true

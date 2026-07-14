@@ -189,3 +189,76 @@ def test_ewise_strided():
     np_b = np.arange(9, 0, -1, dtype=np.float32).reshape(3, 3)[1:3, 1:3]
     
     npt.assert_allclose((slice_a * slice_b).numpy(), np_a * np_b)
+
+
+def test_sum_basic():
+    data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    array = gpu.NDArray(data, [2, 3])
+    np_array = np.array(data, dtype=np.float32).reshape([2, 3])
+    
+    npt.assert_allclose(array.sum([0, 1]).numpy(), np.sum(np_array, axis=(0, 1)))
+    npt.assert_allclose(array.sum([0]).numpy(), np.sum(np_array, axis=0))
+    npt.assert_allclose(array.sum([1]).numpy(), np.sum(np_array, axis=1))
+
+def test_max_with_negatives():
+    # basically testing the atomicCAS loop custom atomic implementations
+    data = [-1.5, 2.0, -3.0, 4.5, -5.0, 6.0]
+    array = gpu.NDArray(data, [2, 3])
+    np_array = np.array(data, dtype=np.float32).reshape([2, 3])
+    
+    npt.assert_allclose(array.max([0, 1]).numpy(), np.max(np_array, axis=(0, 1)))
+    npt.assert_allclose(array.max([0]).numpy(), np.max(np_array, axis=0))
+    npt.assert_allclose(array.max([1]).numpy(), np.max(np_array, axis=1))
+
+def test_min_with_negatives():
+    data = [-1.5, 2.0, -3.0, 4.5, -5.0, 6.0]
+    array = gpu.NDArray(data, [2, 3])
+    np_array = np.array(data, dtype=np.float32).reshape([2, 3])
+    
+    npt.assert_allclose(array.min([0, 1]).numpy(), np.min(np_array, axis=(0, 1)))
+    npt.assert_allclose(array.min([0]).numpy(), np.min(np_array, axis=0))
+    npt.assert_allclose(array.min([1]).numpy(), np.min(np_array, axis=1))
+
+@pytest.mark.parametrize("op_name, np_op", [
+    ("sum", np.sum),
+    ("max", np.max),
+    ("min", np.min)
+])
+def test_reductions_keepdims(op_name, np_op):
+    data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    array = gpu.NDArray(data, [2, 3])
+    np_array = np.array(data, dtype=np.float32).reshape([2, 3])
+    
+    result = getattr(array, op_name)([1], keepdims=True)
+    expected = np_op(np_array, axis=1, keepdims=True)
+    
+    npt.assert_allclose(result.numpy(), expected)
+    
+
+    assert list(result.shape) == list(expected.shape)
+
+@pytest.mark.parametrize("op_name, np_op", [
+    ("sum", np.sum),
+    ("max", np.max),
+    ("min", np.min)
+])
+def test_reductions_strided(op_name, np_op):
+    data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    array = gpu.NDArray(data, [3, 3])
+    sliced = array[0:3:2, 0:3:2]  
+    
+    np_array = np.array(data, dtype=np.float32).reshape([3, 3])
+    np_sliced = np_array[0:3:2, 0:3:2]
+    
+    result = getattr(sliced, op_name)([0])
+    expected = np_op(np_sliced, axis=0)
+    
+    npt.assert_allclose(result.numpy(), expected)
+
+def test_reductions_3d_multi_axis():
+    np_array = np.arange(24, dtype=np.float32).reshape([2, 3, 4])
+    array = gpu.NDArray(np_array.flatten().tolist(), [2, 3, 4])
+    
+    npt.assert_allclose(array.sum([1]).numpy(), np.sum(np_array, axis=1))
+    
+    npt.assert_allclose(array.max([0, 2]).numpy(), np.max(np_array, axis=(0, 2)))

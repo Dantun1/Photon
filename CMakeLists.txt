@@ -31,7 +31,10 @@ if(USE_CUDA)
     set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.8/bin/nvcc")
     set(CMAKE_CUDA_ARCHITECTURES 120)
 
-    add_library(photon_core_gpu STATIC src/gpu/backend_float.cu)
+    add_library(photon_core_gpu STATIC 
+      src/gpu/backend_float.cu
+      src/gpu/device_manager.cu
+    )
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/gpu)
     target_include_directories(photon_core_gpu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/gpu)
