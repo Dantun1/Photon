@@ -34,7 +34,8 @@ struct SumOp {
 
 // CAS loop for atomic max/min of floating point types as not natively supported by CUDA
 template <typename T>
-void __device__ __forceinline__ customAtomicMax(T* dst_addr, T value) {
+__device__ __forceinline__ 
+void customAtomicMax(T* dst_addr, T value) {
   if constexpr (std::is_integral_v<T>) {
     atomicMax(dst_addr, value);
   } else if constexpr (sizeof(T) == 4) {
@@ -65,7 +66,8 @@ void __device__ __forceinline__ customAtomicMax(T* dst_addr, T value) {
 }
 
 template <typename T>
-void __device__ __forceinline__ customAtomicMin(T* dst_addr, T value) {
+__device__ __forceinline__ 
+void customAtomicMin(T* dst_addr, T value) {
   if constexpr (std::is_integral_v<T>) {
     atomicMin(dst_addr, value);
   } else if constexpr (sizeof(T) == 4) {
@@ -105,6 +107,7 @@ void batched_reduction_kernel(
   ) 
 {
   // dynamic buffer for initial reduced x values from global memory 
+  // note to self: look into threads pb as template param to avoid this 
   extern __shared__ T input_segment[];
 
   

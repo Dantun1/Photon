@@ -193,8 +193,9 @@ namespace photon::gpu {
 
     template <typename T>
     NDArray<T> scalar_rpow(const NDArray<T> &a, T b);
-    // template <typename T>
-    // NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b);
+
+    template <typename T>
+    NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b);
 
 
 
