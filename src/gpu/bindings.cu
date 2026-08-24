@@ -94,10 +94,11 @@ PYBIND11_MODULE(backend_gpu, m)
         .def("__pow__", &ewise_pow<float>, py::is_operator())
         .def("__pow__", &scalar_pow<float>, py::is_operator())
         .def("__rpow__", &scalar_rpow<float>, py::is_operator())
-        // Reduction ops 
+        // Reduction ops
         .def("sum", &NDArray<float>::sum, py::arg("axes"), py::arg("keepdims") = false)
         .def("max", &NDArray<float>::max, py::arg("axes"), py::arg("keepdims") = false)
         .def("min", &NDArray<float>::min, py::arg("axes"), py::arg("keepdims") = false)
+        .def("__matmul__", &matmul<float>, py::is_operator())
         // View ops
         .def("make_compact", &NDArray<float>::make_compact)
         .def("reshape", &NDArray<float>::reshape)
