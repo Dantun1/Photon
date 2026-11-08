@@ -39,14 +39,14 @@ class Tensor:
             # copy the data + shape via numpy (for now)
             raw_np_arr = data._data.numpy()
             # allocates new handle like torch
-            self._data = backend.NDArray(raw_np_arr.flatten().tolist(),list(raw_np_arr.shape()))
+            self._data = backend.NDArray(raw_np_arr.flatten().tolist(),list(raw_np_arr.shape))
         elif isinstance(data, (int,float)):
             # Convert to list and create new 1d tensor
             self._data = backend.NDArray([data])
         elif isinstance(data, list):
             self._data = backend.NDArray(data)
         elif isinstance(data, np.ndarray):
-            self._data = backend.NDArray(data.flatten().tolist(),list(data.shape()))
+            self._data = backend.NDArray(data.flatten().tolist(),list(data.shape))
 
         # Initialise as isolated node, no gradient
         self._inputs = []
@@ -134,43 +134,81 @@ class Tensor:
                     continue
 
                 if input_node.grad is None:
-                    input_node.grad = input_grads[i]
+                    input_node.grad = reduce_grad_to_shape(input_grads[i], input_node.shape)
                 else:
-                    input_node.grad = input_node.grad + input_grads[i]
+                    input_node.grad = input_node.grad + reduce_grad_to_shape(input_grads[i], input_node.shape)
+
+
+    def sum(self, axes=None, keepdims=False):
+        return Summation(axes, keepdims)(self)
+
+    def reshape(self, shape):
+        return Reshape(shape)(self)
+
+    def transpose(self, axes=None):
+        return Transpose(axes)(self)
+
+    def broadcast_to(self, shape):
+        return BroadcastTo(shape)(self)
+
     def log(self):
-        ...
+        return Log()(self)
 
+    def exp(self):
+        return Exp()(self)
 
+    def tanh(self):
+        return Tanh()(self)
     
     def __add__(self, other):
         if isinstance(other, (int,float)):
             return ScalarAdd(other)(self)
         elif isinstance(other, Tensor):
             return EwiseAdd()(self, other)
-        
+
+    __radd__ = __add__
+
     def __sub__(self, other):
         if isinstance(other, (int,float)):
             return ScalarSub(other)(self)
         elif isinstance(other, Tensor):
             return EwiseSub()(self, other)
-    
+    def __rsub__(self, other):
+        if isinstance(other, (int, float)):
+            return ScalarAdd(other)(Negate()(self))
+
     def __mul__(self, other):
         if isinstance(other, (int,float)):
             return ScalarMul(other)(self)
         elif isinstance(other, Tensor):
             return EwiseMul()(self, other)
-    
+
+
+    __rmul__ = __mul__ 
+
+
     def __truediv__(self, other):
         if isinstance(other, (int,float)):
             return ScalarDiv(other)(self)
         elif isinstance(other, Tensor):
             return EwiseDiv()(self, other)
-        
+
+    def __rtruediv__(self, other): 
+        if isinstance(other, (int, float)):
+            return ScalarMul(other)(ScalarPow(-1.0)(self))
+
     def __pow__(self, other):
         if isinstance(other, (int,float)):
             return ScalarPow(other)(self)
         elif isinstance(other, Tensor):
             return EwisePow()(self, other)
+    
+    def __neg__(self):
+        return Negate()(self)
+
+    def __matmul__(self, other):
+        return MatMul()(self, other)
+
     
 
     

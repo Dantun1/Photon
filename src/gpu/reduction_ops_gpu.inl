@@ -182,6 +182,8 @@ NDArray<T> NDArray<T>::reduction_dispatch(const DimVec& axes,  ReduceOp op, Atom
       if (dim_removed_yet) current_shape_compatible = false;
     }
   } 
+
+  if (new_shape.empty()) new_shape.push_back(1);
   
   // -- Setup src / dst NDArrays -- 
 
