@@ -134,10 +134,11 @@ void batched_reduction_kernel(
         input_segment[threadIdx.x] = op(input_segment[threadIdx.x], input_segment[threadIdx.x + stride]);
       }
     } 
-
+  
     if (threadIdx.x == 0) {
       at_op(&dst[by],input_segment[0]);
     }
+    __syncthreads();
   }
 }
 
