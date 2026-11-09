@@ -37,22 +37,11 @@ NDArray<T> matmul(const NDArray<T> &a, const NDArray<T> &b)
   const auto ashape = a.get_shape();
   const auto bshape = b.get_shape();
 
-  if (ashape[ashape.size() - 1] != bshape[bshape.size() - 2])
-  {
-    throw std::invalid_argument("Incompatible arrays for MatMul, M x K @ K x P required for non-batch dimensions");
-  }
+  validate_matmul_dims(ashape, bshape);
 
-  DimVec a_batch_dims;
-  DimVec b_batch_dims;
-  for (int i = 0; i < ashape.size() - 2; i++)
-  {
-    a_batch_dims.push_back(ashape[i]);
-  }
+  DimVec a_batch_dims = get_matmul_batch_dims(ashape);
+  DimVec b_batch_dims = get_matmul_batch_dims(bshape);
 
-  for (int i = 0; i < bshape.size() - 2; i++)
-  {
-    b_batch_dims.push_back(bshape[i]);
-  }
 
   // construct final dims for matmul
   auto batch_dims_broadcasted = broadcast_shape(a_batch_dims, b_batch_dims);
