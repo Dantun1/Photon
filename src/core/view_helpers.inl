@@ -26,7 +26,7 @@ inline DimVec broadcast_shape(const DimVec &s1, const DimVec &s2)
 
 
 inline void validate_matmul_dims(const DimVec& sh1, const DimVec& sh2) {
-
+  // TODO: insert logic for converting 1d tensors to be compatible, have to reshape now
   if (sh1.size() <= 1 || sh2.size() <= 1) {
     throw std::invalid_argument("Too few dims for matmul");
   }
